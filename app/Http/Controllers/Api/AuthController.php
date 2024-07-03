@@ -29,7 +29,7 @@ class AuthController extends Controller
             $formFields = [
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => $request->pasword
+                'password' => $request->password
             ];
 
             $formFields['password'] = bcrypt($formFields['password']);
@@ -41,14 +41,46 @@ class AuthController extends Controller
             return response()->json(['user' => $user], 201);
         } catch (\Throwable $th) {
             return response()->json(
-                ['statusCode' => '422', 'message' => "Something went wrong"],
+                ['statusCode' => '422', 'message' => $th->getMessage()],
                 422
             );
         }
     }
 
-    public function login()
+    public function login(Request $request)
     {
+        try {
+            $validator = Validator::make($request->all(), [
+                'email' => ['required', 'email'],
+                'password' => 'required'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'statusCode' => 422, 'message' => $validator->messages()
+                ], 422);
+            }
+
+            $formFields = ['email' => $request->email, 'password' => $request->password];
+
+            if (auth()->attempt($formFields)) {
+                // $request->session()->regenerate();
+
+                $user = User::where('email', $formFields['email']);
+
+                return response()->json(['msg' => $user], 201);
+            } else {
+                return response()->json(
+                    ['statusCode' => '401', 'message' => "Invalid Credentials"],
+                    401
+                );
+            }
+        } catch (\Throwable $th) {
+            return response()->json(
+                ['statusCode' => '422', 'message' => $th->getMessage()],
+                422
+            );
+        }
     }
 
     public function logout()
