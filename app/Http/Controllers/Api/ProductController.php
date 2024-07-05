@@ -21,7 +21,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        return response()->json(['msg' => 'Tesitng route']);
     }
 
     /**

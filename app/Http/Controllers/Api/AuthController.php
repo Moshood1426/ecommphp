@@ -64,9 +64,9 @@ class AuthController extends Controller
             $formFields = ['email' => $request->email, 'password' => $request->password];
 
             if (auth()->attempt($formFields)) {
-                // $request->session()->regenerate();
+                $request->session()->regenerate();
 
-                $user = User::where('email', $formFields['email']);
+                $user = auth()->user();
 
                 return response()->json(['msg' => $user], 201);
             } else {
